@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bé Học Toán</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fff8e7; --card:#ffffff; --ink:#2b2d42; --muted:#6b6f80;
+    --blue:#4f8cff; --green:#22b573; --red:#ff5a5f; --yellow:#ffc93c; --purple:#9b5de5; --orange:#ff8c42;
+    --line:#f0e3c0; --shadow:0 6px 0 rgba(0,0,0,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#1d1f2b; --card:#2a2d3d; --ink:#f4f4f8; --muted:#b4b7c9; --line:#3a3e52; --shadow:0 6px 0 rgba(0,0,0,.35); }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Baloo 2",system-ui,sans-serif;min-height:100vh}
+  .wrap{max-width:900px;margin:0 auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  h1{margin:0;font-size:clamp(28px,6vw,44px);line-height:1.1}
+  h1 span:nth-child(1){color:var(--red)} h1 span:nth-child(2){color:var(--orange)}
+  h1 span:nth-child(3){color:var(--green)} h1 span:nth-child(4){color:var(--blue)}
+  .stars{background:var(--card);border:3px solid var(--yellow);border-radius:999px;padding:6px 16px;font-size:24px;font-weight:800;box-shadow:var(--shadow)}
+  nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 10px}
+  nav button,.range button{font:inherit;font-weight:700;font-size:18px;border:none;border-radius:16px;padding:8px 14px;cursor:pointer;background:var(--card);color:var(--ink);box-shadow:var(--shadow);transition:transform .1s}
+  nav button:hover,.range button:hover{transform:translateY(-2px)}
+  nav button.on{background:var(--blue);color:#fff}
+  .range{display:flex;gap:8px;align-items:center;font-size:18px;color:var(--muted);flex-wrap:wrap}
+  .range button.on{background:var(--purple);color:#fff}
+  .tip{margin:14px 0;background:var(--card);border-left:8px solid var(--yellow);border-radius:14px;padding:10px 16px;font-size:18px;color:var(--muted)}
+  .card{background:var(--card);border-radius:28px;padding:20px;box-shadow:var(--shadow);text-align:center;position:relative;overflow:hidden}
+  .q{display:flex;align-items:center;justify-content:center;gap:10px;font-size:clamp(22px,5vw,32px);font-weight:800;margin:0 0 10px}
+  .speak{font-size:24px;border:none;background:var(--bg);border-radius:50%;width:48px;height:48px;cursor:pointer;flex:none}
+  .visual{min-height:120px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;margin:10px 0 16px}
+  .group{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:260px;font-size:clamp(30px,7vw,44px);line-height:1}
+  .group span{position:relative;display:inline-block}
+  .group span.gone{opacity:.3}
+  .group span.gone::after{content:"✖";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:.8em;opacity:1}
+  .op{font-size:clamp(36px,8vw,56px);font-weight:800;color:var(--orange)}
+  .eq{font-size:clamp(40px,10vw,72px);font-weight:800;letter-spacing:2px;margin-bottom:6px}
+  .eq .box{display:inline-block;min-width:1.4em;border:4px dashed var(--purple);border-radius:16px;color:var(--purple);padding:0 8px}
+  .num{font-size:clamp(56px,14vw,96px);font-weight:800;color:var(--blue);min-width:1.3em}
+  .dots{font-size:14px;color:var(--muted);max-width:140px;margin:0 auto;word-break:break-all;line-height:1.1}
+  .answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;max-width:620px;margin:0 auto}
+  .answers button{font:inherit;font-size:clamp(28px,6vw,40px);font-weight:800;border:none;border-radius:20px;padding:10px;cursor:pointer;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.18);transition:transform .1s}
+  .answers button:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+  .answers button:nth-child(4n+1){background:var(--blue)} .answers button:nth-child(4n+2){background:var(--green)}
+  .answers button:nth-child(4n+3){background:var(--orange)} .answers button:nth-child(4n+4){background:var(--purple)}
+  .answers button.small{font-size:clamp(20px,4.5vw,28px)}
+  .answers button.wrong{background:#b9bccb !important;animation:shake .4s}
+  .answers button.right{background:var(--green) !important;transform:scale(1.08)}
+  @keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
+  .fb{min-height:44px;font-size:28px;font-weight:800;margin-top:12px}
+  .fb.ok{color:var(--green)} .fb.no{color:var(--red)}
+  .confetti{position:absolute;font-size:28px;pointer-events:none;animation:fly 1.2s ease-out forwards}
+  @keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(360deg);opacity:0}}
+  footer{text-align:center;color:var(--muted);margin:18px 0 8px;font-size:15px}
+  .reset{font:inherit;background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span>Bé</span> <span>Học</span> <span>Toán</span> <span>Lớp 1</span></h1>
+    <div class="stars">⭐ <span id="stars">0</span></div>
+  </header>
+
+  <nav id="nav">
+    <button data-mode="count" class="on">🔢 Đếm số</button>
+    <button data-mode="add">➕ Phép cộng</button>
+    <button data-mode="sub">➖ Phép trừ</button>
+    <button data-mode="cmp">⚖️ So sánh</button>
+    <button data-mode="shape">🔷 Hình học</button>
+  </nav>
+  <div class="range" id="range">
+    Phạm vi:
+    <button data-r="5">5</button>
+    <button data-r="10" class="on">10</button>
+    <button data-r="20">20</button>
+  </div>
+
+  <div class="tip" id="tip"></div>
+
+  <div class="card" id="card">
+    <div class="q"><span id="q"></span><button class="speak" id="speak" title="Đọc câu hỏi">🔊</button></div>
+    <div class="visual" id="visual"></div>
+    <div class="answers" id="answers"></div>
+    <div class="fb" id="fb"></div>
+  </div>
+
+  <footer>Làm đúng mỗi câu được 1 ngôi sao ⭐ · <button class="reset" id="reset">Đặt lại sao</button></footer>
+</div>
+
+<script>
+const ITEMS = [['🍎','quả táo'],['🐟','con cá'],['⭐','ngôi sao'],['🎈','quả bóng bay'],['🐥','chú gà con'],
+  ['🌸','bông hoa'],['🍌','quả chuối'],['🚗','chiếc ô tô'],['🐞','con bọ rùa'],['🍓','quả dâu'],['🐶','chú cún'],['🧁','chiếc bánh']];
+const TIPS = {
+  count:'👉 Bé chỉ tay vào từng hình và đếm to: một, hai, ba... Hình cuối cùng là số cần tìm!',
+  add:'👉 Phép cộng là <b>gộp lại</b>. Ví dụ 2 + 3: có 2, thêm 3 nữa, đếm tất cả được 5.',
+  sub:'👉 Phép trừ là <b>bớt đi</b>. Ví dụ 5 − 2: có 5, bớt đi 2 (gạch chéo ✖), còn lại 3.',
+  cmp:'👉 Dấu <b>&gt;</b> là "lớn hơn", dấu <b>&lt;</b> là "bé hơn", dấu <b>=</b> là "bằng nhau". Miệng dấu luôn há về phía số lớn hơn!',
+  shape:'👉 Hình tròn không có góc. Hình tam giác có 3 cạnh. Hình vuông có 4 cạnh dài bằng nhau. Hình chữ nhật có 2 cạnh dài, 2 cạnh ngắn.'
+};
+const PRAISE = ['Giỏi quá! 🎉','Đúng rồi! 👏','Tuyệt vời! 🌟','Bé thông minh quá! 🥳','Xuất sắc! 🏆'];
+
+let mode='count', range=10, cur=null, locked=false;
+let stars = 0;
+try{ stars = parseInt(localStorage.getItem('toan1-stars')) || 0; }catch(e){}
+
+const $ = id => document.getElementById(id);
+const rand = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = arr => { for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr; };
+function numOptions(correct, min, max, n=4){
+  const s = new Set([correct]);
+  const near = [correct-1,correct+1,correct-2,correct+2].filter(x=>x>=min&&x<=max);
+  shuffle(near).forEach(x=>{ if(s.size<n) s.add(x); });
+  let guard=0; while(s.size<Math.min(n,max-min+1) && guard++<100) s.add(rand(min,max));
+  return shuffle([...s]);
+}
+const group = (emo, n, gone=0) => '<div class="group">' +
+  Array.from({length:n},(_,i)=>`<span class="${i>=n-gone?'gone':''}">${emo}</span>`).join('') + '</div>';
+
+const GEN = {
+  count(){
+    const [emo,name] = pick(ITEMS), n = rand(1,range);
+    return {q:`Có bao nhiêu ${name}?`, visual:group(emo,n), answers:numOptions(n,1,range), correct:n};
+  },
+  add(){
+    const a = rand(0,range), b = rand(0,range-a), [emo] = pick(ITEMS);
+    return {q:`${a} cộng ${b} bằng mấy?`,
+      visual:`<div style="width:100%"><div class="eq">${a} + ${b} = <span class="box">?</span></div></div>`
+        + group(emo,a) + '<span class="op">+</span>' + group(emo,b),
+      answers:numOptions(a+b,0,range), correct:a+b};
+  },
+  sub(){
+    const a = rand(1,range), b = rand(0,a), [emo] = pick(ITEMS);
+    return {q:`${a} trừ ${b} còn mấy?`,
+      visual:`<div style="width:100%"><div class="eq">${a} − ${b} = <span class="box">?</span></div></div>` + group(emo,a,b),
+      answers:numOptions(a-b,0,range), correct:a-b};
+  },
+  cmp(){
+    const a = rand(0,range), b = Math.random()<.2 ? a : rand(0,range);
+    const sign = a>b?'>':a<b?'<':'=';
+    const dots = n => `<div class="dots">${'●'.repeat(n)||'&nbsp;'}</div>`;
+    return {q:`Chọn dấu đúng: ${a} ... ${b}`,
+      visual:`<div><div class="num">${a}</div>${dots(a)}</div><div class="eq"><span class="box">?</span></div><div><div class="num">${b}</div>${dots(b)}</div>`,
+      answers:['>','<','='], correct:sign, speakText:`So sánh ${a} và ${b}`};
+  },
+  shape(){
+    const colors = ['#ff5a5f','#4f8cff','#22b573','#ffc93c','#9b5de5','#ff8c42'];
+    const c = pick(colors);
+    const shapes = {
+      'Hình tròn':`<circle cx="70" cy="70" r="60" fill="${c}"/>`,
+      'Hình vuông':`<rect x="15" y="15" width="110" height="110" rx="6" fill="${c}"/>`,
+      'Hình tam giác':`<polygon points="70,10 132,128 8,128" fill="${c}"/>`,
+      'Hình chữ nhật':`<rect x="0" y="35" width="140" height="70" rx="6" fill="${c}"/>`
+    };
+    const name = pick(Object.keys(shapes));
+    return {q:'Đây là hình gì?',
+      visual:`<svg width="160" height="160" viewBox="-5 -5 150 150" role="img" aria-label="hình cần đoán">${shapes[name]}</svg>`,
+      answers:shuffle(Object.keys(shapes)), correct:name, small:true};
+  }
+};
+
+function speak(text){
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang='vi-VN'; u.rate=.9;
+    const v = speechSynthesis.getVoices().find(v=>v.lang && v.lang.startsWith('vi'));
+    if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function render(){
+  cur = GEN[mode](); locked=false;
+  $('tip').innerHTML = TIPS[mode];
+  $('q').textContent = cur.q;
+  $('visual').innerHTML = cur.visual;
+  $('fb').textContent=''; $('fb').className='fb';
+  $('answers').innerHTML='';
+  cur.answers.forEach(ans=>{
+    const b = document.createElement('button');
+    b.textContent = ans; if(cur.small) b.className='small';
+    b.onclick = () => choose(b, ans);
+    $('answers').appendChild(b);
+  });
+}
+
+function choose(btn, ans){
+  if(locked || btn.classList.contains('wrong')) return;
+  if(ans === cur.correct){
+    locked = true;
+    btn.classList.add('right');
+    const msg = pick(PRAISE);
+    $('fb').textContent = msg; $('fb').className='fb ok';
+    stars++; saveStars(); confetti(btn); speak(msg.replace(/[^\p{L}\s!]/gu,''));
+    setTimeout(render, 1400);
+  } else {
+    btn.classList.add('wrong');
+    $('fb').textContent = 'Chưa đúng, bé thử lại nhé! 💪'; $('fb').className='fb no';
+    speak('Chưa đúng, bé thử lại nhé');
+  }
+}
+
+function confetti(btn){
+  const card = $('card'), r = btn.getBoundingClientRect(), cr = card.getBoundingClientRect();
+  for(let i=0;i<14;i++){
+    const s = document.createElement('span');
+    s.className='confetti'; s.textContent = pick(['⭐','🎉','✨','🌟','🎈']);
+    s.style.left = (r.left-cr.left+r.width/2)+'px'; s.style.top = (r.top-cr.top)+'px';
+    s.style.setProperty('--dx', rand(-160,160)+'px'); s.style.setProperty('--dy', rand(-220,-60)+'px');
+    card.appendChild(s); setTimeout(()=>s.remove(),1300);
+  }
+}
+
+function saveStars(){
+  $('stars').textContent = stars;
+  try{ localStorage.setItem('toan1-stars', stars); }catch(e){}
+}
+
+$('nav').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  mode = b.dataset.mode;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on', x===b));
+  $('range').style.visibility = mode==='shape' ? 'hidden' : 'visible';
+  render();
+};
+$('range').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  range = +b.dataset.r;
+  document.querySelectorAll('#range button').forEach(x=>x.classList.toggle('on', x===b));
+  render();
+};
+$('speak').onclick = () => speak(cur.speakText || cur.q);
+$('reset').onclick = () => { stars=0; saveStars(); };
+
+saveStars(); render();
+</script>
+</body>
+</html>

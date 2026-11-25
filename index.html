@@ -56,6 +56,8 @@
   .dots{font-size:14px;color:var(--muted);max-width:140px;margin:0 auto;word-break:break-all;line-height:1.1}
   .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.05;font-size:.82em}
   .frac>span:first-child{border-bottom:.09em solid currentColor;padding:0 .15em}
+  .story{text-align:left;background:var(--bg);border-radius:18px;padding:14px 18px;max-width:680px;font-size:clamp(19px,4.4vw,24px);font-weight:600;line-height:1.5}
+  .sol{display:block;font-size:clamp(17px,4vw,21px);color:var(--muted);margin-top:4px}
   .chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
   .chips span{background:var(--bg);border-radius:16px;padding:4px 16px;font-size:clamp(28px,7vw,44px);font-weight:800;color:var(--blue)}
 
@@ -121,7 +123,7 @@ const renderMath = s => String(s).replace(/(\d+)\/(\d+)/g,'<span class="frac"><s
 const renderExpr = s => renderMath(s).replace(/\?/g, BOX);
 const toSpeech = s => String(s).replace(/(\d+)\/(\d+)/g,'$1 phần $2').replace(/×/g,' nhân ').replace(/ : /g,' chia ')
   .replace(/\+/g,' cộng ').replace(/−/g,' trừ ').replace(/=/g,' bằng ').replace(/\?/g,' mấy ').replace(/%/g,' phần trăm')
-  .replace(/cm²/g,'xăng ti mét vuông').replace(/cm/g,'xăng ti mét');
+  .replace(/cm²/g,'xăng ti mét vuông').replace(/cm/g,'xăng ti mét').replace(/dm³/g,'đề xi mét khối').replace(/km\/giờ/g,'ki lô mét một giờ');
 
 // 4 đáp án số: correct + các giá trị nhiễu (giá trị tuyệt đối)
 function opts(correct, cands, f=fmt, min=0){
@@ -363,6 +365,94 @@ const GRADES = {
 ]},
 };
 
+/* ================= Toán có lời văn ================= */
+const NAMES = ['An','Bình','Lan','Mai','Hoa','Nam','Minh','Hà','Tú','Linh','Khôi','Ngọc'];
+const two = () => { const a=pick(NAMES); let b; do{ b=pick(NAMES); }while(b===a); return [a,b]; };
+const coprime = (lo,hi) => { let m,n; do{ n=rand(lo,hi); m=rand(1,n-1); }while(gcd(m,n)!==1); return [m,n]; };
+const THINGS = [['🍎','quả táo','quả'],['🍬','cái kẹo','cái'],['✏️','cây bút chì','cây'],['🎈','quả bóng bay','quả'],['📘','quyển vở','quyển'],['🌸','bông hoa','bông']];
+
+const WORD = {
+1:[
+  ()=>{ const n=pick(NAMES), [e,th,u]=pick(THINGS), a=rand(1,range-1), b=rand(1,range-a), R=a+b;
+    return {t:`${e} ${n} có ${a} ${th}, mẹ cho thêm ${b} ${th}. Hỏi ${n} có tất cả bao nhiêu ${th}?`, R, c:[Math.abs(a-b),R+1,R-1], u, sol:`${a} + ${b} = ${R} (${u})`, min:0}; },
+  ()=>{ const a=rand(2,range), b=rand(1,a-1), R=a-b;
+    return {t:`🐦 Trên cành có ${a} con chim, sau đó ${b} con bay đi. Hỏi trên cành còn lại mấy con chim?`, R, c:[a+b,R+1,R-1], u:'con', sol:`${a} − ${b} = ${R} (con)`, min:0}; },
+  ()=>{ const a=rand(1,range-1), b=rand(1,range-a), R=a+b;
+    return {t:`🚌 Trên xe buýt có ${a} bạn, đến bến có thêm ${b} bạn lên xe. Hỏi trên xe có tất cả bao nhiêu bạn?`, R, c:[Math.abs(a-b),R+1,R-1], u:'bạn', sol:`${a} + ${b} = ${R} (bạn)`, min:0}; },
+  ()=>{ const n=pick(NAMES), a=rand(2,range), b=rand(1,a-1), R=a-b;
+    return {t:`🍪 ${n} có ${a} cái bánh, ${n} đã ăn hết ${b} cái. Hỏi ${n} còn lại mấy cái bánh?`, R, c:[a+b,R+1,R-1], u:'cái', sol:`${a} − ${b} = ${R} (cái)`, min:0}; },
+],
+2:[
+  ()=>{ const a=rand(20,75), d=rand(5,Math.min(25,100-a)), R=a+d;
+    return {t:`🌳 Lớp 2A trồng được ${a} cây, lớp 2B trồng được nhiều hơn lớp 2A ${d} cây. Hỏi lớp 2B trồng được bao nhiêu cây?`, R, c:[a-d,R+10,R-10,R+1], u:'cây', sol:`${a} + ${d} = ${R} (cây)`}; },
+  ()=>{ const a=rand(40,99), d=rand(5,35), R=a-d;
+    return {t:`🛢️ Thùng thứ nhất có ${a} lít dầu, thùng thứ hai có ít hơn thùng thứ nhất ${d} lít. Hỏi thùng thứ hai có bao nhiêu lít dầu?`, R, c:[a+d,R+10,R-10,R-1], u:'l', sol:`${a} − ${d} = ${R} (l)`}; },
+  ()=>{ const n=rand(2,10), R=2*n;
+    return {t:`🐔 Mỗi con gà có 2 chân. Hỏi ${n} con gà có tất cả bao nhiêu chân?`, R, c:[n+2,R+2,R-2], u:'chân', sol:`2 × ${n} = ${R} (chân)`}; },
+  ()=>{ const n=rand(2,10), R=5*n;
+    return {t:`🌼 Mỗi bình có 5 bông hoa. Hỏi ${n} bình như thế có tất cả bao nhiêu bông hoa?`, R, c:[n+5,R+5,R-5], u:'bông', sol:`5 × ${n} = ${R} (bông)`}; },
+  ()=>{ const b=pick([2,5]), q=rand(2,10);
+    return {t:`🍊 Có ${b*q} quả cam chia đều vào ${b} đĩa. Hỏi mỗi đĩa có mấy quả cam?`, R:q, c:[q+1,q-1,b*q-b], u:'quả', sol:`${b*q} : ${b} = ${q} (quả)`}; },
+  ()=>{ const b=pick([2,5]), q=rand(2,10);
+    return {t:`👫 Có ${b*q} bạn xếp đều thành các hàng, mỗi hàng có ${b} bạn. Hỏi xếp được mấy hàng?`, R:q, c:[q+1,q-1,b*q+b], u:'hàng', sol:`${b*q} : ${b} = ${q} (hàng)`}; },
+],
+3:[
+  ()=>{ const k=rand(4,6), a=rand(5,Math.floor(60/k)), R=a*k;
+    return {t:`👨 Năm nay con ${a} tuổi, tuổi bố gấp ${k} lần tuổi con. Hỏi năm nay bố bao nhiêu tuổi?`, R, c:[a+k,R+a,R-a], u:'tuổi', sol:`${a} × ${k} = ${R} (tuổi)`}; },
+  ()=>{ const k=rand(2,6), N=k*rand(3,9), R=N/k;
+    return {t:`🍊 Mẹ có ${N} quả cam, mẹ biếu bà 1/${k} số cam đó. Hỏi mẹ biếu bà bao nhiêu quả cam?`, R, c:[N-R,R+1,R*2], u:'quả', sol:`${N} : ${k} = ${R} (quả)`}; },
+  ()=>{ const a=rand(300,900), b=rand(50,200), c=rand(50,Math.min(200,a-b-20)), R=a-b-c;
+    return {t:`🏪 Cửa hàng có ${a} kg gạo, buổi sáng bán được ${b} kg, buổi chiều bán được ${c} kg. Hỏi cửa hàng còn lại bao nhiêu ki-lô-gam gạo?`, R, c:[a-b,a-b+c,R+10,R-10], u:'kg', sol:`${a} − ${b} − ${c} = ${R} (kg)`}; },
+  ()=>{ const k=rand(2,6), p=rand(4,12); let m; do{ m=rand(2,9); }while(m===k); const R=m*p;
+    return {t:`📦 ${k} thùng như nhau có ${k*p} chai nước. Hỏi ${m} thùng như thế có bao nhiêu chai nước?`, R, c:[k*p*m,k*p+m,R+p,R-p], u:'chai', sol:`${k*p} : ${k} = ${p} (chai) → ${p} × ${m} = ${R} (chai)`}; },
+  ()=>{ const p=rand(5,15), n=rand(2,9), R=p*n*1000;
+    return {t:`📘 Mỗi quyển vở giá ${fmt(p*1000)} đồng. Hỏi mua ${n} quyển vở như thế hết bao nhiêu tiền?`, R, c:[R+1000*p,R-1000*p,(p+n)*1000,R*10], u:'đồng', sol:`${fmt(p*1000)} × ${n} = ${fmt(R)} (đồng)`}; },
+],
+4:[
+  ()=>{ const s=rand(20,100), H=rand(4,40), b=s+H, S=b+s;
+    return {t:`🌳 Hai lớp trồng được tất cả ${S} cây. Lớp 4A trồng nhiều hơn lớp 4B ${H} cây. Hỏi lớp 4A trồng được bao nhiêu cây?`, R:b, c:[s,S-H,b+H,b-1], u:'cây', sol:`(${S} + ${H}) : 2 = ${b} (cây)`}; },
+  ()=>{ const s=rand(10,40), H=rand(2,20), b=s+H, S=b+s;
+    return {t:`🏡 Một mảnh vườn hình chữ nhật có nửa chu vi là ${S} m, chiều dài hơn chiều rộng ${H} m. Tính chiều rộng mảnh vườn.`, R:s, c:[b,S-H,s+1,s-1], u:'m', sol:`(${S} − ${H}) : 2 = ${s} (m)`}; },
+  ()=>{ const [A,B]=two(), [m,n]=coprime(3,7), k=rand(2,12), S=k*(m+n), R=k*n;
+    return {t:`📚 ${A} và ${B} có tất cả ${S} quyển truyện. Số truyện của ${A} bằng ${m}/${n} số truyện của ${B}. Hỏi ${B} có bao nhiêu quyển truyện?`, R, c:[k*m,S/2,S-k,k*(n+1)], u:'quyển', sol:`${S} : (${m} + ${n}) × ${n} = ${R} (quyển)`}; },
+  ()=>{ const n=rand(3,5), con=rand(6,Math.floor(55/n)), H=con*n-con;
+    return {t:`👩 Mẹ hơn con ${H} tuổi. Tuổi con bằng 1/${n} tuổi mẹ. Tính tuổi con hiện nay.`, R:con, c:[con*n,H/n,con+1,H], u:'tuổi', sol:`${H} : (${n} − 1) = ${con} (tuổi)`}; },
+  ()=>{ const A=rand(20,90), x=A+rand(-10,10), y=A+rand(-10,10), z=3*A-x-y;
+    return {t:`🍭 Ba ngày cửa hàng bán được lần lượt ${x} kg, ${y} kg và ${z} kg đường. Hỏi trung bình mỗi ngày cửa hàng bán được bao nhiêu ki-lô-gam đường?`, R:A, c:[3*A,A+1,A-1,A+2], u:'kg', sol:`(${x} + ${y} + ${z}) : 3 = ${A} (kg)`}; },
+  ()=>{ const n=pick([3,4,5,7]), m=rand(1,n-1), N=n*rand(Math.ceil(20/n),Math.floor(42/n)), R=N/n*m;
+    return {t:`👧 Lớp 4B có ${N} học sinh, trong đó ${m}/${n} số học sinh là nữ. Hỏi lớp 4B có bao nhiêu học sinh nữ?`, R, c:[N-R,N/n,R+1,R-1], u:'học sinh', sol:`${N} × ${m} : ${n} = ${R} (học sinh)`}; },
+],
+5:[
+  ()=>{ const N=pick([20,25,40,50]), st=N===40?2:1, x=st*rand(Math.ceil(.3*N/st),Math.floor(.7*N/st)), R=x*100/N;
+    return {t:`👧 Lớp 5A có ${N} học sinh, trong đó có ${x} học sinh nữ. Tìm tỉ số phần trăm của số học sinh nữ và số học sinh cả lớp.`, R, c:[100-R,R+5,R-5,x], u:'%', sol:`${x} : ${N} = ${dec(R)} = ${R}%`}; },
+  ()=>{ const A=pick(NAMES), r=pick([5,6,8,10]), P=rand(2,50)*1000000, R=P*r/1000;
+    return {t:`🏦 Bác ${A} gửi tiết kiệm ${fmt(P)} đồng với lãi suất ${dec(r*10)}% một tháng. Hỏi sau một tháng bác nhận được bao nhiêu tiền lãi?`, R, c:[R*10,R/10,R+P/1000,R*2], u:'đồng', sol:`${fmt(P)} × ${dec(r*10)} : 100 = ${fmt(R)} (đồng)`}; },
+  ()=>{ const t2=rand(2,9), v=rand(8,15)*4, R=v*t2/2;
+    return {t:`🚗 Một ô tô đi với vận tốc ${v} km/giờ. Hỏi trong ${dec(t2*50)} giờ ô tô đi được bao nhiêu ki-lô-mét?`, R, c:[R+v,R-v,v*t2,v+t2], u:'km', sol:`${v} × ${dec(t2*50)} = ${R} (km)`}; },
+  ()=>{ const v=rand(10,18), t=rand(2,4), s=v*t;
+    return {t:`🚴 Một người đi xe đạp được ${s} km trong ${t} giờ. Tính vận tốc của người đó.`, R:v, c:[s*t,s-t,v+2,v-2], u:'km/giờ', sol:`${s} : ${t} = ${v} (km/giờ)`}; },
+  ()=>{ const v=rand(4,9)*10, t=rand(2,6), s=v*t;
+    return {t:`🚆 Một tàu hỏa đi quãng đường dài ${s} km với vận tốc ${v} km/giờ. Hỏi tàu đi hết bao nhiêu giờ?`, R:t, c:[t+1,t-1,t*2], u:'giờ', sol:`${s} : ${v} = ${t} (giờ)`}; },
+  ()=>{ const a=rand(6,15), b=rand(3,a-1), h=rand(3,10), R=a*b*h;
+    return {t:`🐟 Một bể cá hình hộp chữ nhật dài ${a} dm, rộng ${b} dm, cao ${h} dm. Tính thể tích của bể cá.`, R, c:[(a+b)*2*h,a*b+h,a*b,R+a*b], u:'dm³', sol:`${a} × ${b} × ${h} = ${R} (dm³)`}; },
+  ()=>{ const P=rand(10,50)*10000, p=pick([10,20,25,30,40,50]), R=P*(100-p)/100;
+    return {t:`🛍️ Một chiếc áo giá ${fmt(P)} đồng, nay được giảm giá ${p}%. Hỏi bây giờ mua chiếc áo đó phải trả bao nhiêu tiền?`, R, c:[P*p/100,P-p*1000,R+10000,R-10000], u:'đồng', sol:`${fmt(P)} × ${100-p} : 100 = ${fmt(R)} (đồng)`}; },
+],
+};
+const WORD_TIPS = {
+  1:'👉 Đọc kỹ đề: "thêm", "tất cả" thường là phép <b>cộng</b>; "bớt", "bay đi", "ăn hết", "còn lại" thường là phép <b>trừ</b>.',
+  2:'👉 "Nhiều hơn" → phép cộng, "ít hơn" → phép trừ. "Mỗi … có …, hỏi tất cả" → phép nhân. "Chia đều", "mỗi hàng" → phép chia.',
+  3:'👉 Gấp lên nhiều lần → nhân. Tìm 1/k của một số → chia cho k. Bài rút về đơn vị: tìm giá trị 1 phần trước, rồi nhân lên.',
+  4:'👉 Tổng – hiệu: Số lớn = (Tổng + Hiệu) : 2, Số bé = (Tổng − Hiệu) : 2. Tổng – tỉ, Hiệu – tỉ: vẽ sơ đồ, tìm giá trị một phần trước.',
+  5:'👉 Quãng đường = vận tốc × thời gian. Tỉ số % của a và b = a : b × 100. Thể tích hình hộp chữ nhật = dài × rộng × cao.',
+};
+function word(p){
+  const f = x => fmt(x) + (p.u==='%' ? '%' : ' '+p.u);
+  return {q:'Đọc đề và chọn đáp án:', visual:`<div class="story">${renderMath(p.t)}</div>`,
+    say: toSpeech(p.t.replace(/^[^\p{L}\d]+/u,'')), sol:p.sol, ...opts(p.R, p.c, f, p.min ?? 1)};
+}
+for(const g in WORD) GRADES[g].topics.push({id:'word', label:'📖 Lời văn', range:g==='1', tip:WORD_TIPS[g], gen:()=>word(pick(WORD[g])())});
+
 /* ================= Trạng thái ================= */
 const PRAISE = ['Giỏi quá! 🎉','Đúng rồi! 👏','Tuyệt vời! 🌟','Bé thông minh quá! 🥳','Xuất sắc! 🏆'];
 let grade = 1, topicOf = {1:'count',2:'add2',3:'mul',4:'bignum',5:'decadd'}, cur=null, locked=false, stars=0;
@@ -416,10 +506,11 @@ function choose(btn, ans){
   if(ans === String(cur.correct)){
     locked = true; btn.classList.add('right');
     const msg = pick(PRAISE);
-    $('fb').textContent = msg; $('fb').className='fb ok';
+    $('fb').innerHTML = msg + (cur.sol ? `<span class="sol">✍️ Bài giải: ${renderMath(cur.sol)}</span>` : '');
+    $('fb').className='fb ok';
     stars++; $('stars').textContent = stars; save(); confetti(btn);
     speak(msg.replace(/[^\p{L}\s!]/gu,''));
-    setTimeout(render, 1400);
+    setTimeout(render, cur.sol ? 3500 : 1400);
   } else {
     btn.classList.add('wrong');
     $('fb').textContent = 'Chưa đúng, bé thử lại nhé! 💪'; $('fb').className='fb no';
